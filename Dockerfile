@@ -18,7 +18,7 @@ FROM openjdk:11-jre-slim
 WORKDIR /app
 
 # Copy the JAR file from the build stage
-COPY --from=build /app/target/lbg-hello-world-maven.jar .
+COPY --from=build /app/target/hello-world-maven-1.0-SNAPSHOT.jar .
 
 # Expose the port that the application runs on
 EXPOSE 8080
