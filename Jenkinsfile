@@ -2,21 +2,21 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'your-docker-image:latest' // Define a name for the Docker image
+        DOCKER_IMAGE = 'lbg-hello-world-maven:latest' // Define a name for the Docker image
     }
 
     stages {
         stage('Checkout') {
             steps {
                 // Checkout the code from the repository
-                git branch: 'main', url: 'https://your-repo-url.git'
+                git branch: 'main', url: 'https://github.com/John-D-Edmondson/lbg-hello-world-maven.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Build the Docker image using the Dockerfile
+                    // Build the Docker image using the Dockerfile in the current directory
                     def customImage = docker.build(DOCKER_IMAGE, '.')
                 }
             }
@@ -25,10 +25,8 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 script {
-                    // Run the Docker container to produce the JAR file
-                    docker.image(DOCKER_IMAGE).inside {
-                        sh 'java -jar /app/lbg-hello-world-maven.jar'
-                    }
+                    // Run the Docker container to execute the JAR file
+                    sh "docker run --rm -v ${pwd()}/target:/app/target ${DOCKER_IMAGE}"
                 }
             }
         }
