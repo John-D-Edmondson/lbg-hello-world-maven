@@ -1,36 +1,55 @@
-pipeline{
+pipeline {
     agent any
-    
-    tools {
-        maven 'Maven 3.9.9'
+
+    environment {
+        DOCKER_IMAGE = 'your-docker-image:latest' // Define a name for the Docker image
     }
-    
+
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/John-D-Edmondson/lbg-hello-world-maven.git'
+                // Checkout the code from the repository
+                git branch: 'main', url: 'https://your-repo-url.git'
             }
         }
-        stage('Compile') {
+
+        stage('Build Docker Image') {
             steps {
-                sh 'mvn clean compile'
+                script {
+                    // Build the Docker image using the Dockerfile
+                    def customImage = docker.build(DOCKER_IMAGE, '.')
+                }
             }
         }
-        stage ('Test') {
+
+        stage('Run Docker Container') {
             steps {
-                sh 'mvn -Dmaven.compile.skip test'
+                script {
+                    // Run the Docker container to produce the JAR file
+                    docker.image(DOCKER_IMAGE).inside {
+                        sh 'java -jar /app/lbg-hello-world-maven.jar'
+                    }
+                }
             }
         }
-        stage ('Package') {
+
+        stage('Archive Artifact') {
             steps {
-                sh 'mvn -Dmaven.test.skip -Dmaven.compile.skip package'
+                // Archive the JAR file
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
     }
-    
-    
-    
-    
-    
-    
+
+    post {
+        always {
+            echo 'Pipeline completed'
+        }
+        success {
+            echo 'Pipeline succeeded'
+        }
+        failure {
+            echo 'Pipeline failed'
+        }
+    }
 }
